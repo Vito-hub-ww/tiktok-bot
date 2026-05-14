@@ -48,7 +48,6 @@ Wybierz wygodny sposób płatności i zacznij zarabiać na swoich 🇺🇸 filma
     },
     "accounts": {
         "title": "Konto TikTok + instrukcja 🇺🇸",
-        "photo": "https://i.pinimg.com/736x/c4/50/98/c45098f00cee7ddb754db7aa71b6decf.jpg",
         "description_part1": """Konto TikTok + instrukcja 🇺🇸
 
 Konto do monetyzacji, zarejestrowane prosto we Francji, z maksymalnym zaufaniem od TikToka + dostęp do mojego Prywatnego Kanału!
@@ -111,7 +110,7 @@ async def show_service(call: CallbackQuery):
     # --- PŁATNE USŁUGI ---
     await call.message.delete()
     
-    # Крок 1: ФОТО (якщо є)
+    # Крок 1: ФОТО тільки якщо є (для monetization є, для accounts — немає)
     if 'photo' in item:
         await bot.send_photo(
             chat_id=call.from_user.id,
@@ -119,16 +118,16 @@ async def show_service(call: CallbackQuery):
             caption=f"{item['title']}\n\nPrzykład konta 👆"
         )
     
-    # Крок 2: Перший текст опису
+    # Крок 2: Текст опису
     if 'description_part1' in item:
+        # Для accounts — два окремі повідомлення
         await call.message.answer(item['description_part1'])
-        # Крок 3: Другий текст (ціна + заклик)
         await call.message.answer(item['description_part2'])
     else:
-        # Для monetyzacji — один довгий текст
+        # Для monetization — один довгий текст
         await call.message.answer(item['description'])
     
-    # Крок 4: Рахунок з кнопкою оплати
+    # Крок 3: Рахунок з кнопкою оплати
     desc_short = f"{item['title']} - {item['price_pln']}"
     if len(desc_short) > 250:
         desc_short = desc_short[:247] + "..."
