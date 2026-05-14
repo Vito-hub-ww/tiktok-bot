@@ -47,10 +47,24 @@ Wybierz wygodny sposób płatności i zacznij zarabiać na swoich 🇺🇸 filma
         "content": "Dziękujemy! Napisz do menedżera, aby podłączyć monetyzację: @twój_nick"
     },
     "accounts": {
-        "title": "Konta z milionami wyświetleń 🔥",
-        "description": "Prosto z Francji, gotowe do pracy",
-        "price_pln": "150 PLN",
-        "price_stars": 1500,
+        "title": "Konto TikTok + instrukcja 🇺🇸",
+        "photo": "https://i.pinimg.com/736x/c4/50/98/c45098f00cee7ddb754db7aa71b6decf.jpg",
+        "description_part1": """Konto TikTok + instrukcja 🇺🇸
+
+Konto do monetyzacji, zarejestrowane prosto we Francji, z maksymalnym zaufaniem od TikToka + dostęp do mojego Prywatnego Kanału!
+
+🧹 Czyste konto, nikt i nigdy nie robił na nim filmów, pasuje pod każdą Twoją tematykę.
+
+🔐 Do konta będzie przypisany tylko Email, który oddajemy w zestawie. Później zmieniasz dane na swoje i konto w 100% Twoje.
+
+📖 W zestawie dołączam instrukcje po prawidłowej rozgrzewce konta dla dobrych wyświetleń, instrukcje publikacji filmów na USA (lub dowolną inną) publiczność, instrukcje weryfikacji, wypłaty pieniędzy i nie tylko!!""",
+        "description_part2": """💳 Cena konta + instrukcji: tylko 30€
+
+Po dołączeniu do mojego prywatnego kanału z instrukcjami, automatycznie wydam dane do konta.
+
+Wybierz wygodny sposób płatności i wkręć się w 🇺🇸 TikTok razem z nami!""",
+        "price_pln": "30€",
+        "price_stars": 1200,
         "content": "Dziękujemy! Oto dane do konta:\nLogin: example\nHasło: 12345"
     }
 }
@@ -95,21 +109,26 @@ async def show_service(call: CallbackQuery):
         return
     
     # --- PŁATNE USŁUGI ---
-    # Крок 1: Видаляємо старе повідомлення з меню
     await call.message.delete()
     
-    # Крок 2: Надсилаємо ФОТО з коротким підписом
+    # Крок 1: ФОТО (якщо є)
     if 'photo' in item:
         await bot.send_photo(
             chat_id=call.from_user.id,
             photo=item['photo'],
-            caption=f"{item['title']}\n\nPrzykład konta z monetyzacją 👆"
+            caption=f"{item['title']}\n\nPrzykład konta 👆"
         )
     
-    # Крок 3: Надсилаємо ПОВНИЙ опис
-    await call.message.answer(item['description'])
+    # Крок 2: Перший текст опису
+    if 'description_part1' in item:
+        await call.message.answer(item['description_part1'])
+        # Крок 3: Другий текст (ціна + заклик)
+        await call.message.answer(item['description_part2'])
+    else:
+        # Для monetyzacji — один довгий текст
+        await call.message.answer(item['description'])
     
-    # Крок 4: Надсилаємо рахунок (invoice) з кнопкою оплати
+    # Крок 4: Рахунок з кнопкою оплати
     desc_short = f"{item['title']} - {item['price_pln']}"
     if len(desc_short) > 250:
         desc_short = desc_short[:247] + "..."
@@ -137,7 +156,6 @@ async def show_service(call: CallbackQuery):
 
 @dp.callback_query(F.data == "back")
 async def go_back(call: CallbackQuery):
-    # Видаляємо всі повідомлення цієї послуги і показуємо меню
     await call.message.delete()
     await call.message.answer(
         "Wybierz usługę 👇",
