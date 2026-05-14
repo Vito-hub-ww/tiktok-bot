@@ -18,6 +18,7 @@ SERVICES = {
     },
     "monetization": {
         "title": "Monetyzacja pod klucz 💰",
+        "photo": "https://i.pinimg.com/736x/c4/50/98/c45098f00cee7ddb754db7aa71b6decf.jpg",
         "description": """Konto TikTok z podłączoną monetyzacją 🇺🇸
 
 Na koncie już jest podłączona monetyzacja, możesz publikować filmy i od razu zarabiać + dostęp do mojego prywatnego kanału!!
@@ -93,16 +94,25 @@ async def show_service(call: CallbackQuery):
         await call.message.edit_text(text, reply_markup=keyboard)
         return
     
-    desc = item['description']
-    if len(desc) > 250:
-        desc = desc[:247] + "..."
+    # --- PŁATNE USŁUGI ---
+    # Крок 1: Видаляємо старе повідомлення з меню
+    await call.message.delete()
     
-    text = (
-        f"{item['title']}\n\n"
-        f"{item['description']}\n\n"
-        f"💰 Cena: {item['price_pln']} ({item['price_stars']} ⭐)\n\n"
-        f"Kliknij przycisk poniżej, aby kupić:"
-    )
+    # Крок 2: Надсилаємо ФОТО з коротким підписом
+    if 'photo' in item:
+        await bot.send_photo(
+            chat_id=call.from_user.id,
+            photo=item['photo'],
+            caption=f"{item['title']}\n\nPrzykład konta z monetyzacją 👆"
+        )
+    
+    # Крок 3: Надсилаємо ПОВНИЙ опис
+    await call.message.answer(item['description'])
+    
+    # Крок 4: Надсилаємо рахунок (invoice) з кнопкою оплати
+    desc_short = f"{item['title']} - {item['price_pln']}"
+    if len(desc_short) > 250:
+        desc_short = desc_short[:247] + "..."
     
     buy_button = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
@@ -117,18 +127,19 @@ async def show_service(call: CallbackQuery):
     await bot.send_invoice(
         chat_id=call.from_user.id,
         title=item['title'],
-        description=desc,
+        description=desc_short,
         payload=key,
         provider_token="",
         currency="XTR",
         prices=prices,
         reply_markup=buy_button
     )
-    await call.message.delete()
 
 @dp.callback_query(F.data == "back")
 async def go_back(call: CallbackQuery):
-    await call.message.edit_text(
+    # Видаляємо всі повідомлення цієї послуги і показуємо меню
+    await call.message.delete()
+    await call.message.answer(
         "Wybierz usługę 👇",
         reply_markup=main_menu()
     )
